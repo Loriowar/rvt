@@ -75,7 +75,11 @@ module RVT
         # generator, so bin/rails may not be available.
         if c.command.blank?
           local_rails = Rails.root.join('bin/rails')
-          timeout_path = `which timeout`.chomp
+          begin
+            `timeout 2>/dev/null`
+            timeout_path = 'timeout' unless $?.exitstatus == 127
+          rescue Errno::ENOENT
+          end
           timeout_suffix =
             if timeout_path.present? && c.process_timeout.present?
               "#{timeout_path} #{c.process_timeout.to_i}"
